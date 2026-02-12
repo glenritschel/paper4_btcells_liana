@@ -87,12 +87,20 @@ def main():
         adata.obs["b_subtype"] = "Other"
         adata.obs.loc[adata.obs["cell_type"] == "B_cell", "b_subtype"] = "B_like"
         # Plasma override: if plasma high and MS4A1 low-ish, mark plasma-like
-        if "MS4A1" in adata.var_names:
-            ms4a1 = np.asarray(adata[:, "MS4A1"].X).reshape(-1)
-        else:
-            ms4a1 = np.zeros(adata.n_obs)
 
-        plasma_hi = (adata.obs["Plasma_score"] > 0.3) & (ms4a1 < np.quantile(ms4a1, 0.6))
+        if "MS4A1" in adata.var_names:
+            x = adata[:, "MS4A1"].X
+            # x can be sparse; force dense 1D float array
+            if hasattr(x, "toarray"):
+                ms4a1 = x.toarray().ravel().astype(np.float32, copy=False)
+            else:
+                ms4a1 = np.asarray(x).ravel().astype(np.float32, copy=False)
+        else:
+            ms4a1 = np.zeros(adata.n_obs, dtype=np.float32)
+
+        ms4a1_q60 = float(np.quantile(ms4a1, 0.6))
+        plasma_hi = (adata.obs["Plasma_score"].to_numpy() > 0.3) & (ms4a1 < ms4a1_q60)
+
         adata.obs.loc[plasma_hi, "b_subtype"] = "Plasma_like"
 
         # T subtype
