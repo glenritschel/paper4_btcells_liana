@@ -2,3 +2,6 @@ datasets:
   - geo: GSE210395
     label: ssc_pbmc_gse210395
 
+  - geo: GSE195452
+    label: ssc_pbmc_gse195452
+

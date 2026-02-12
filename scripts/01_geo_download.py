@@ -13,6 +13,9 @@ import os
 import sys
 import yaml
 import GEOparse
+import urllib.request
+from urllib.parse import urlparse
+
 
 def load_yaml(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
@@ -58,11 +61,30 @@ def main():
         pd.DataFrame(rows).to_csv(md_path, sep="\t", index=False)
         print(f"Wrote sample metadata: {md_path}")
 
-        print("Downloading supplementary files (if any)...")
-        try:
-            gse.download_supplementary_files(ds_dir)
-        except Exception as e:
-            print(f"WARNING: supplementary download error for {geo}: {e}", file=sys.stderr)
+        print("Downloading series supplementary files (if any)...")
+
+        # GEOparse stores series-level metadata on gse.metadata; supplementary file URLs are often here.
+        supp_urls = gse.metadata.get("supplementary_file", [])
+        supp_urls = [u for u in supp_urls if u and str(u).upper() != "NONE"]
+
+        if not supp_urls:
+            print("No series-level supplementary_file URLs found in metadata.")
+        else:
+            for u in supp_urls:
+                u = str(u).strip()
+                fn = os.path.basename(urlparse(u).path)
+                out_path = os.path.join(ds_dir, fn)
+                if os.path.exists(out_path):
+                    print(f"  exists: {out_path}")
+                    continue
+                print(f"  downloading: {u}")
+                try:
+                    urllib.request.urlretrieve(u, out_path)
+                    print(f"  wrote: {out_path}")
+                except Exception as e:
+                    print(f"WARNING: failed to download {u}: {e}", file=sys.stderr)
+
+        print("NOTE: Skipping SRA downloads here (use separate SRA step only if needed).")
 
         print(f"Done: {geo} -> {ds_dir}")
 
