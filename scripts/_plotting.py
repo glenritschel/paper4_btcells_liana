@@ -7,20 +7,14 @@ PNG is always 300 DPI. PDF is vector.
 
 from __future__ import annotations
 import os
-from typing import Optional
 import matplotlib.pyplot as plt
 
 
 def set_publication_style() -> None:
-    # Display DPI (interactive) and save DPI (PNG)
     plt.rcParams["figure.dpi"] = 300
     plt.rcParams["savefig.dpi"] = 300
-
-    # Consistent tight layout defaults
     plt.rcParams["savefig.bbox"] = "tight"
     plt.rcParams["savefig.pad_inches"] = 0.05
-
-    # Reasonable defaults (tune later if desired)
     plt.rcParams["figure.figsize"] = (6, 4)
     plt.rcParams["axes.spines.top"] = False
     plt.rcParams["axes.spines.right"] = False

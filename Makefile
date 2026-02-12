@@ -46,5 +46,9 @@ liana:
 report:
 	$(PY) scripts/06_reports.py --indir results/liana --outdir results
 
+lintfig:
+	$(PY) scripts/99_check_no_png_only.py
+
+
 all: dirs geo qc annotate score liana report
 
