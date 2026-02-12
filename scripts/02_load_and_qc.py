@@ -23,7 +23,7 @@ import pandas as pd
 import scanpy as sc
 import matplotlib.pyplot as plt
 
-from _plotting import set_publication_style
+from _plotting import set_publication_style, savefig_png_pdf
 set_publication_style()
 
 
@@ -105,8 +105,8 @@ def load_counts_from_dir(ds_dir: str) -> sc.AnnData:
 
     return adata
 
-def qc_plots(adata: sc.AnnData, out_png: str):
-    plt.figure()
+
+def qc_plots(adata: sc.AnnData, out_base_no_ext: str):
     sc.pl.violin(
         adata,
         ["n_genes_by_counts", "total_counts", "pct_counts_mt"],
@@ -114,8 +114,8 @@ def qc_plots(adata: sc.AnnData, out_png: str):
         multi_panel=True,
         show=False,
     )
-    plt.savefig(out_png, dpi=300)
-    plt.close()
+    savefig_png_pdf(out_base_no_ext)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -163,7 +163,7 @@ def main():
         print("Wrote:", pre_path)
 
         # Plot pre-filter
-        qc_plots(adata, os.path.join(args.outdir, f"{label}.qc_violin_pre.png"))
+        qc_plots(adata, os.path.join(args.outdir, f"{label}.qc_violin_pre"))
 
         # Conservative filters
         keep = (
@@ -181,7 +181,7 @@ def main():
         sc.pp.log1p(adata)
 
         # Plot post-filter
-        qc_plots(adata, os.path.join(args.outdir, f"{label}.qc_violin_post.png"))
+        qc_plots(adata, os.path.join(args.outdir, f"{label}.qc_violin_post"))
 
         out_path = os.path.join(args.outdir, f"{label}.qc.h5ad")
         adata.write(out_path)

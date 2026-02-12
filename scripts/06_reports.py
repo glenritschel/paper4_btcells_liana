@@ -16,7 +16,7 @@ import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from _plotting import set_publication_style
+from _plotting import set_publication_style, savefig_png_pdf
 set_publication_style()
 
 FOCUS_PAIRS = [
@@ -118,10 +118,12 @@ def main():
     plt.ylabel("LIANA rows")
     plt.title("LIANA result size per dataset")
     plt.tight_layout()
-    fig_path = os.path.join(out_figs, "liana_rows_per_dataset.png")
-    plt.savefig(fig_path, dpi=300)
-    plt.close()
-    print("Wrote:", fig_path)
+
+    base = os.path.join(out_figs, "liana_rows_per_dataset")
+    png_path, pdf_path = savefig_png_pdf(base)
+    print("Wrote:", png_path)
+    print("Wrote:", pdf_path)
+
 
 if __name__ == "__main__":
     main()
