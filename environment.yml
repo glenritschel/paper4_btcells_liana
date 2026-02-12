@@ -1,0 +1,43 @@
+name: paper4-btcells-liana
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pip
+  - git
+  - make
+  - curl
+  - wget
+  - unzip
+  - pigz
+  - jq
+
+  # scientific stack
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - statsmodels
+
+  # plotting
+  - matplotlib
+  - seaborn
+
+  # single-cell
+  - anndata
+  - scanpy>=1.9.6
+  - pytorch-cpu  # switch to pytorch if you have GPU; keep CPU for reproducibility
+
+  # utilities
+  - pyyaml
+  - rich
+  - tqdm
+  - joblib
+
+  - pip:
+      - GEOparse
+      - liana
+      - igraph
+      - leidenalg
+      - harmonypy

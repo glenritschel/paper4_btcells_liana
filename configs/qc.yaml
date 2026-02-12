@@ -1,0 +1,10 @@
+qc:
+  min_genes: 200
+  max_genes: 6000
+  max_mt_pct: 15
+  mt_prefixes: ["MT-", "mt-"]
+
+annotation:
+  b_markers: ["CD19", "MS4A1", "CD79A"]
+  t_markers: ["CD3D", "CD3E", "CD3G"]
+

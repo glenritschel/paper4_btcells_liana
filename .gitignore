@@ -1,0 +1,38 @@
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+.env
+
+# editors/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# data/work/results (keep results committed if you want; adjust below)
+data/**
+work/**
+!data/README.md
+!work/README.md
+
+# if you DO want results tracked, remove results/** below
+# results/**
+# !results/README.md
+
+# large single-cell artifacts
+*.h5ad
+*.loom
+*.rds
+*.h5
+*.mtx
+*.mtx.gz
+*.tsv.gz
+*.csv.gz
+*.parquet
+*.zarr/
+
+# logs
+*.log
+

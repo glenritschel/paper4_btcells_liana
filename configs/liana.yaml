@@ -1,0 +1,8 @@
+liana:
+  groupby: cell_type
+  sample_key: sample_id
+  use_raw: false
+  min_cells_per_group: 50
+  sender: "B_cell"
+  receiver: "T_cell"
+

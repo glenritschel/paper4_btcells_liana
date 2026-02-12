@@ -1,0 +1,28 @@
+scores:
+  b_activation:
+    - HLA-DRA
+    - HLA-DRB1
+    - HLA-DQA1
+    - HLA-DQB1
+    - HLA-DPA1
+    - HLA-DPB1
+    - CD80
+    - CD86
+
+  th2:
+    - GATA3
+    - IL4
+    - IL5
+    - IL13
+    - IL4R
+    - IL13RA1
+    - IL1RL1
+
+  th17:
+    - RORC
+    - IL17A
+    - IL17F
+    - IL23R
+    - CCR6
+    - IL1R1
+
