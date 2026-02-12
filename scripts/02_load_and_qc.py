@@ -22,6 +22,8 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import matplotlib.pyplot as plt
+import gzip
+from scipy import sparse
 
 from _plotting import set_publication_style, savefig_png_pdf
 set_publication_style()
@@ -45,6 +47,38 @@ def load_counts_from_dir(ds_dir: str) -> sc.AnnData:
         adata = sc.read_h5ad(h5ad)
         adata.uns.setdefault("source_files", {})["h5ad"] = h5ad
         return adata
+
+    # Try Series-level processed count matrix (TSV.GZ), e.g. GSE210395_scRNA_countMatrix.tsv.gz
+    tsv_gz = find_first([
+        os.path.join(ds_dir, "**", "*countMatrix*.tsv.gz"),
+        os.path.join(ds_dir, "**", "*countmatrix*.tsv.gz"),
+        os.path.join(ds_dir, "**", "*count_matrix*.tsv.gz"),
+    ])
+
+    if tsv_gz:
+        # Expected format: rows=genes, cols=cells, first column gene symbol/id
+        print(f"Found count matrix TSV.GZ: {tsv_gz}")
+
+        df = pd.read_csv(tsv_gz, sep="\t", compression="gzip", index_col=0)
+
+        # Coerce all entries to numeric; non-numeric becomes NaN -> fill with 0
+        # This fixes object dtype caused by stray strings/NA.
+        df = df.apply(pd.to_numeric, errors="coerce").fillna(0)
+
+        # Ensure a numeric dtype compatible with sparse
+        mat = df.to_numpy(dtype=np.float32, copy=False)
+
+        X = sparse.csr_matrix(mat)
+        adata = sc.AnnData(X=X)
+
+        adata.var_names = df.index.astype(str)
+        adata.obs_names = df.columns.astype(str)
+        adata.var_names_make_unique()
+        adata.obs_names_make_unique()
+
+        adata.uns.setdefault("source_files", {})["countMatrix_tsv_gz"] = tsv_gz
+        return adata
+
 
     # Try 10x mtx layout
     mtx = find_first([
