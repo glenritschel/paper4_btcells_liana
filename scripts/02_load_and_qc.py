@@ -55,28 +55,42 @@ def load_counts_from_dir(ds_dir: str) -> sc.AnnData:
         os.path.join(ds_dir, "**", "*count_matrix*.tsv.gz"),
     ])
 
+
     if tsv_gz:
-        # Expected format: rows=genes, cols=cells, first column gene symbol/id
-        print(f"Found count matrix TSV.GZ: {tsv_gz}")
+        print(f"Found count matrix TSV.GZ (long format): {tsv_gz}")
+        print("Parsing long table and building sparse matrix (this can take a few minutes)...")
 
-        df = pd.read_csv(tsv_gz, sep="\t", compression="gzip", index_col=0)
+        # Read only required columns; enforce dtypes
+        df = pd.read_csv(
+            tsv_gz,
+            sep="\t",
+            compression="gzip",
+            usecols=["feature", "cell", "counts"],
+            dtype={"feature": "string", "cell": "string", "counts": "int32"},
+        )
 
-        # Coerce all entries to numeric; non-numeric becomes NaN -> fill with 0
-        # This fixes object dtype caused by stray strings/NA.
-        df = df.apply(pd.to_numeric, errors="coerce").fillna(0)
+        # Map feature/cell to integer indices
+        genes = pd.Index(df["feature"].astype(str).unique(), name="gene")
+        cells = pd.Index(df["cell"].astype(str).unique(), name="cell")
 
-        # Ensure a numeric dtype compatible with sparse
-        mat = df.to_numpy(dtype=np.float32, copy=False)
+        gene_to_i = pd.Series(np.arange(len(genes), dtype=np.int32), index=genes)
+        cell_to_j = pd.Series(np.arange(len(cells), dtype=np.int32), index=cells)
 
-        X = sparse.csr_matrix(mat)
+        # Build COO indices
+        row = gene_to_i[df["feature"].astype(str)].to_numpy(dtype=np.int32, copy=False)
+        col = cell_to_j[df["cell"].astype(str)].to_numpy(dtype=np.int32, copy=False)
+        data = df["counts"].to_numpy(dtype=np.float32, copy=False)
+
+        # Construct sparse matrix with shape (cells x genes) for Scanpy conventions
+        X = sparse.coo_matrix((data, (col, row)), shape=(len(cells), len(genes))).tocsr()
+
         adata = sc.AnnData(X=X)
-
-        adata.var_names = df.index.astype(str)
-        adata.obs_names = df.columns.astype(str)
-        adata.var_names_make_unique()
+        adata.obs_names = cells.astype(str)
+        adata.var_names = genes.astype(str)
         adata.obs_names_make_unique()
+        adata.var_names_make_unique()
 
-        adata.uns.setdefault("source_files", {})["countMatrix_tsv_gz"] = tsv_gz
+        adata.uns.setdefault("source_files", {})["countMatrix_tsv_gz_long"] = tsv_gz
         return adata
 
 
