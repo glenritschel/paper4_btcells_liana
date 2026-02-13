@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+.ONESHELL:
 
 ENV ?= btcells-scvi
 PY  ?= python
@@ -38,16 +39,42 @@ annotate:
 	$(PY) scripts/03_annotate_bt.py --config configs/run.yaml --indir work/qc --outdir work/annot
 
 score:
-	$(PY) scripts/04_score_programs.py --config configs/scoring.yaml --indir work/annot --outdir work/scored
+	$(PY) scripts/04_score_programs.py --config configs/run.yaml --indir work/annot --outdir work/scored
 
 liana:
-	$(PY) scripts/05_run_liana.py --config configs/liana.yaml --indir work/scored --outdir results/liana
+	$(PY) scripts/05_run_liana.py --config configs/run.yaml --indir work/scored --outdir results/liana
 
 report:
 	$(PY) scripts/06_reports.py --indir results/liana --outdir results
 
 lintfig:
 	$(PY) scripts/99_check_no_png_only.py
+
+# -----------------------------
+# Compare LIANA datasets
+# -----------------------------
+
+COMPARE_OUTDIR = results/tables
+
+compare: $(COMPARE_OUTDIR)/liana_overlap_summary.json
+
+$(COMPARE_OUTDIR)/liana_overlap_summary.json: \
+	results/liana/ssc_pbmc_gse195452.liana.tsv \
+	results/liana/ssc_pbmc_gse210395.liana.tsv \
+	scripts/07_compare_liana_datasets.py
+	@echo "Running cross-dataset LIANA comparison..."
+	@mkdir -p $(COMPARE_OUTDIR)
+	python scripts/07_compare_liana_datasets.py \
+		--a-name GSE195452 \
+		--a results/liana/ssc_pbmc_gse195452.liana.tsv \
+		--b-name GSE210395 \
+		--b results/liana/ssc_pbmc_gse210395.liana.tsv \
+		--sender B_cell \
+		--receiver T_cell \
+		--top-n 50 \
+		--key lr \
+		--outdir $(COMPARE_OUTDIR)
+	@echo "Comparison complete."
 
 
 all: dirs geo qc annotate score liana report

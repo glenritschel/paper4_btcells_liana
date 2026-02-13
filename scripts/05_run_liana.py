@@ -4,16 +4,9 @@
 
 Run LIANA receptor-ligand inference on B<->T interactions.
 
-- Uses rank_aggregate.by_sample if sample_key exists and has >1 sample.
-- Falls back to rank_aggregate if sample_key missing.
-
-Writes:
-  results/liana/<label>.liana.tsv
-  results/liana/<label>.liana_top_bt.tsv
-  results/liana/<label>.liana_top_tb.tsv
-
-Usage:
-  python scripts/05_run_liana.py --config configs/liana.yaml --indir work/scored --outdir results/liana
+Robust per-sample mode:
+- Filters out samples that don't have enough cells in BOTH sender and receiver.
+- Falls back to pooled rank_aggregate if too few valid samples remain.
 """
 
 import argparse
@@ -22,10 +15,43 @@ import yaml
 import pandas as pd
 import scanpy as sc
 import liana as li
+import numpy as np
+import scipy.sparse as sp
 
 def load_yaml(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        return yaml.safe_load(f) or {}
+
+
+def _valid_samples_bt(
+    adata: sc.AnnData,
+    sample_key: str,
+    groupby: str,
+    sender: str,
+    receiver: str,
+    min_cells: int,
+) -> list[str]:
+    """
+    Return sample ids where BOTH sender and receiver have >= min_cells.
+    """
+    df = adata.obs[[sample_key, groupby]].copy()
+
+    # counts per (sample, group)
+    ct = (
+        df.groupby([sample_key, groupby], observed=False)
+        .size()
+        .unstack(fill_value=0)
+    )
+
+    # ensure columns exist
+    if sender not in ct.columns:
+        ct[sender] = 0
+    if receiver not in ct.columns:
+        ct[receiver] = 0
+
+    ok = ct[(ct[sender] >= min_cells) & (ct[receiver] >= min_cells)]
+    return ok.index.astype(str).tolist()
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -43,6 +69,7 @@ def main():
     receiver = cfg.get("receiver", "T_cell")
 
     os.makedirs(args.outdir, exist_ok=True)
+
     files = [f for f in os.listdir(args.indir) if f.endswith(".scored.h5ad")]
     if not files:
         raise SystemExit(f"No *.scored.h5ad in {args.indir}")
@@ -53,22 +80,93 @@ def main():
         print(f"\n=== LIANA: {label} ===")
         adata = sc.read_h5ad(path)
 
-        # Ensure groupby exists
         if groupby not in adata.obs.columns:
-            raise RuntimeError(f"{groupby} not in adata.obs columns: {list(adata.obs.columns)}")
+            raise RuntimeError(
+                f"{label}: '{groupby}' not in adata.obs columns: {list(adata.obs.columns)}"
+            )
 
-        # Subset to B and T only for speed/clarity
+        # Subset to B and T only (speed/clarity)
         adata_bt = adata[adata.obs[groupby].isin([sender, receiver])].copy()
 
-        # Basic cell count gate
+
+        def _x_max(X) -> float:
+            # Works for dense and sparse without densifying
+            if sp.issparse(X):
+                # scipy sparse max() returns a 1x1 matrix or scalar depending on version
+                m = X.max()
+                try:
+                    return float(m)
+                except TypeError:
+                    return float(m.toarray().item())
+            return float(np.max(X))
+
+        # Preserve original counts once (if not already present)
+        if "counts" not in adata_bt.layers:
+            adata_bt.layers["counts"] = adata_bt.X.copy()
+
+        # Prefer Scanpy's own marker for log1p preprocessing
+        already_log1p = isinstance(adata_bt.uns.get("log1p", None), dict)
+
+        # Fallback heuristic (only used if log1p marker absent)
+        # Typical log1p normalized values are usually < ~15-20
+        x_max = _x_max(adata_bt.X)
+        looks_like_counts = (not already_log1p) and (x_max > 20)
+
+        if looks_like_counts:
+            print(f"[LIANA] Detected count-like .X (max={x_max:.2f}). Normalizing + log1p.")
+            sc.pp.normalize_total(adata_bt, target_sum=1e4)
+            sc.pp.log1p(adata_bt)
+        else:
+            print(f"[LIANA] .X looks log1p-normalized (max={x_max:.2f}, log1p_marker={already_log1p}). Proceeding.")
+
+        # Dataset-level gate
         counts = adata_bt.obs[groupby].value_counts()
         print("Group counts:\n", counts)
         if counts.get(sender, 0) < min_cells or counts.get(receiver, 0) < min_cells:
-            print(f"WARNING: insufficient cells for LIANA (min {min_cells}). Skipping {label}.")
+            print(f"[WARN] insufficient cells for LIANA (min {min_cells}). Skipping {label}.")
             continue
 
-        # Choose per-sample mode if possible
-        has_sample = sample_key in adata_bt.obs.columns and adata_bt.obs[sample_key].nunique() > 1
+        # Decide per-sample mode
+        has_sample = (
+            sample_key in adata_bt.obs.columns
+            and adata_bt.obs[sample_key].nunique() > 1
+        )
+
+        # If per-sample, filter to valid samples first
+        if has_sample:
+            valid = _valid_samples_bt(
+                adata_bt, sample_key, groupby, sender, receiver, min_cells
+            )
+            print(f"Per-sample mode: {adata_bt.obs[sample_key].nunique()} total samples")
+            print(f"Keeping {len(valid)} samples with >= {min_cells} {sender} AND >= {min_cells} {receiver}")
+
+            if len(valid) == 0:
+                print("[WARN] No samples meet per-sample thresholds. Falling back to pooled mode.")
+                has_sample = False
+            else:
+                adata_bt = adata_bt[adata_bt.obs[sample_key].astype(str).isin(valid)].copy()
+
+                # After filtering, if only 1 sample remains, pooled is more sensible
+                if adata_bt.obs[sample_key].nunique() <= 1:
+                    print("[WARN] <=1 valid sample after filtering. Falling back to pooled mode.")
+                    has_sample = False
+
+        # Defensive: never call LIANA with 0 cells
+        if adata_bt.n_obs == 0:
+            print("[WARN] 0 cells after filtering. Skipping.")
+            continue
+
+
+        # --- Remove genes expressed in 0 cells (stabilizes LIANA) ---
+        n_vars_before = adata_bt.n_vars
+        sc.pp.filter_genes(adata_bt, min_cells=1)
+        n_vars_after = adata_bt.n_vars
+        if n_vars_after != n_vars_before:
+            print(f"[LIANA] Removed {n_vars_before - n_vars_after} all-zero genes.")
+
+        # -------------------------
+        # Run LIANA
+        # -------------------------
         try:
             if has_sample:
                 print(f"Running rank_aggregate.by_sample(groupby={groupby}, sample_key={sample_key})")
@@ -80,7 +178,7 @@ def main():
                     verbose=True,
                 )
             else:
-                print(f"Running rank_aggregate(groupby={groupby}) (no usable {sample_key})")
+                print(f"Running rank_aggregate(groupby={groupby})")
                 li.mt.rank_aggregate(
                     adata_bt,
                     groupby=groupby,
@@ -92,18 +190,14 @@ def main():
 
         res = adata_bt.uns.get("liana_res")
         if res is None:
-            raise RuntimeError("No adata.uns['liana_res'] produced")
+            raise RuntimeError(f"{label}: No adata.uns['liana_res'] produced")
 
-        # Persist full table
         out_all = os.path.join(args.outdir, f"{label}.liana.tsv")
         res.to_csv(out_all, sep="\t", index=False)
         print("Wrote:", out_all)
 
-        # Filter key directions
-        # LIANA columns typically: source, target, ligand_complex, receptor_complex, aggregate_rank, ...
         def top_direction(df, src, tgt, n=200):
             df2 = df[(df["source"] == src) & (df["target"] == tgt)].copy()
-            # lower aggregate_rank is "better" in LIANA
             if "aggregate_rank" in df2.columns:
                 df2 = df2.sort_values("aggregate_rank", ascending=True)
             return df2.head(n)
@@ -117,6 +211,7 @@ def main():
         tb.to_csv(out_tb, sep="\t", index=False)
         print("Wrote:", out_bt)
         print("Wrote:", out_tb)
+
 
 if __name__ == "__main__":
     main()

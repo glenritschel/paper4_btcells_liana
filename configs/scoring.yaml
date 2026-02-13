@@ -1,14 +1,43 @@
 scores:
-  b_activation:
+  # 1) Antigen presentation (separate it so it doesn’t dominate “activation”)
+  b_mhc_ii:
     - HLA-DRA
     - HLA-DRB1
     - HLA-DQA1
     - HLA-DQB1
     - HLA-DPA1
     - HLA-DPB1
+    - HLA-DMA
+    - HLA-DMB
+
+  # 2) Costimulation / APC activation
+  b_costim:
     - CD80
     - CD86
+    - CD40
+    - CD83
+    - ICOSLG
 
+  # 3) IFN/antiviral activation (common in autoimmune contexts)
+  b_ifn:
+    - ISG15
+    - IFIT1
+    - IFIT3
+    - MX1
+    - OAS1
+    - STAT1
+    - IRF7
+
+  # 4) General inflammatory / cytokine-supportive program (keep modest)
+  b_inflammatory:
+    - IL6
+    - TNFSF13B
+    - CXCL10
+    - CCL5
+    - NFKBIA
+    - JUNB
+
+  # Keep your T programs (fine)
   th2:
     - GATA3
     - IL4
