@@ -1,0 +1,25 @@
+{
+  "input": "results/amplification_q1q4_210395/lr_amplification_gse210395_Blow_vs_gse210395_Bhigh.tsv",
+  "x": "delta_rank",
+  "y": "pair_amp_log2fc",
+  "method": "spearman",
+  "n_rows": 126,
+  "r_observed": -0.2520659940538373,
+  "p_observed_parametric": 0.00440831767991927,
+  "bootstrap": {
+    "n": 20000,
+    "alpha": 0.05,
+    "ci_low": -0.4204465776546688,
+    "ci_high": -0.07256732024787332,
+    "mean": -0.2509477741545282,
+    "median": -0.25311140204223553,
+    "std": 0.08910733714026059
+  },
+  "permutation": {
+    "n": 20000,
+    "p_empirical_two_sided": 0.00359982000899955,
+    "null_mean": 0.0006755245026465817,
+    "null_std": 0.08981772399737094
+  },
+  "seed": 0
+}
