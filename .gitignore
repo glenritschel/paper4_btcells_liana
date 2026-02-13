@@ -144,11 +144,14 @@ progeny/
 *.Rproj
 
 #############################
-# Optional: keep directory structure with .gitkeep
+# Curated paper outputs (TRACK)
 #############################
-# Uncomment if you want empty dirs tracked:
-# results/*
-# !results/.gitkeep
-# work/*
-# !work/.gitkeep
+!paper/
+!paper/figures/
+!paper/figures/**
+!paper/figures/.gitkeep
+
+!paper/tables/
+!paper/tables/**
+!paper/tables/.gitkeep
 
