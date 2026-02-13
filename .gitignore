@@ -1,38 +1,154 @@
-# python
-__pycache__/
-*.pyc
-.ipynb_checkpoints/
-.venv/
-.env
-
-# editors/OS
+#############################
+# OS / editor / misc
+#############################
 .DS_Store
 Thumbs.db
-.vscode/
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*~
 .idea/
+.vscode/
+*.code-workspace
 
-# data/work/results (keep results committed if you want; adjust below)
-data/**
-work/**
-!data/README.md
-!work/README.md
+#############################
+# Python build / cache
+#############################
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.log
 
-# if you DO want results tracked, remove results/** below
-# results/**
-# !results/README.md
+#############################
+# Virtualenv / Conda / Mamba
+#############################
+.venv/
+venv/
+.env/
+env/
+conda-env/
+.mamba/
+# (If you keep env YAMLs, TRACK them. Do not ignore *.yml / *.yaml globally.)
 
-# large single-cell artifacts
+#############################
+# Jupyter
+#############################
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+#############################
+# Data & artifacts (DO NOT TRACK)
+#############################
+# Pipeline working directories (your project uses work/)
+work/
+data/
+raw/
+tmp/
+cache/
+scratch/
+downloads/
+geo_download/
+GEO_download/
+fastq/
+bam/
+cram/
+
+# Common large scRNA artifacts
 *.h5ad
-*.loom
-*.rds
 *.h5
+*.loom
+*.zarr
+*.npz
+*.npy
 *.mtx
 *.mtx.gz
-*.tsv.gz
-*.csv.gz
-*.parquet
-*.zarr/
+barcodes.tsv
+barcodes.tsv.gz
+features.tsv
+features.tsv.gz
+genes.tsv
+genes.tsv.gz
+matrix.mtx
+matrix.mtx.gz
 
-# logs
-*.log
+# Archives / compressed datasets
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.gz
+*.bz2
+*.xz
+*.7z
+
+#############################
+# Results / figures / reports (generally DO NOT TRACK)
+#############################
+results/
+out/
+outputs/
+reports/
+figures/
+tables/
+plots/
+
+# If you want to keep small, hand-curated figures, remove these:
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.svg
+*.pdf
+
+# Common report formats
+*.html
+*.md.html
+
+#############################
+# Scanpy / scVI / lightning / wandb
+#############################
+scvi_run*/
+scvi_runs*/
+lightning_logs/
+wandb/
+mlruns/              # MLflow
+tensorboard/
+runs/
+
+#############################
+# Liana / CellPhoneDB / niche outputs
+#############################
+liana/
+cellphonedb/
+cpdb/
+nichenetr/
+decoupler/
+dorothea/
+progeny/
+
+#############################
+# R / Seurat (if you ever mix)
+#############################
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+#############################
+# Optional: keep directory structure with .gitkeep
+#############################
+# Uncomment if you want empty dirs tracked:
+# results/*
+# !results/.gitkeep
+# work/*
+# !work/.gitkeep
 

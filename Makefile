@@ -29,13 +29,13 @@ dirs:
 	touch data/README.md work/README.md results/README.md notebooks/README.md
 
 geo:
-	$(PY) scripts/01_geo_download.py --config configs/datasets.yaml --outdir work/geo
+	$(PY) scripts/01_geo_download.py --config configs/run.yaml --outdir work/geo
 
 qc:
-	$(PY) scripts/02_load_and_qc.py --config configs/qc.yaml --indir work/geo --outdir work/qc
+	$(PY) scripts/02_load_and_qc.py --config configs/run.yaml --indir work/geo --outdir work/qc
 
 annotate:
-	$(PY) scripts/03_annotate_bt.py --config configs/qc.yaml --indir work/qc --outdir work/annot
+	$(PY) scripts/03_annotate_bt.py --config configs/run.yaml --indir work/qc --outdir work/annot
 
 score:
 	$(PY) scripts/04_score_programs.py --config configs/scoring.yaml --indir work/annot --outdir work/scored

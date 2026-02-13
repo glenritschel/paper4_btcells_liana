@@ -4,4 +4,14 @@ datasets:
 
   - geo: GSE195452
     label: ssc_pbmc_gse195452
+    overrides:
+      qc:
+        max_mt_pct: 25
+        gsm_smoke_n: 0
+        # min_genes: 200
+        # max_genes: 6000
+      # liana:
+      #   ...
+      # scoring:
+      #   ...
 
