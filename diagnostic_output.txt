@@ -1,0 +1,92 @@
+================================================================================
+PAPER 4 DIAGNOSTIC ANALYSIS
+================================================================================
+
+================================================================================
+PART 1: DATASET OVERVIEW
+================================================================================
+
+--- GSE195452 ---
+Total cells: 192,881
+Total genes: 57,874
+
+Cell type distribution:
+  Other                           175,094 cells
+  T_cell                           13,429 cells
+  B_cell                            4,358 cells
+
+Potential sample/donor columns: ['sample_id']
+  sample_id: 721 unique values
+
+Score columns present: ['Tfh_like_score', 'Treg_like_score', 'b_mhc_ii', 'b_costim', 'th2', 'th17']
+
+--- GSE210395 ---
+Total cells: 32,236
+Total genes: 24,856
+
+Cell type distribution:
+  Other                            26,998 cells
+  B_cell                            2,676 cells
+  T_cell                            2,562 cells
+
+Potential sample/donor columns: ['sample_id']
+  sample_id: 1 unique values
+
+Score columns present: ['Tfh_like_score', 'Treg_like_score', 'b_mhc_ii', 'b_costim', 'th2', 'th17']
+
+================================================================================
+PART 2: SCORE DISTRIBUTIONS
+================================================================================
+
+--- GSE195452 ---
+Tfh_like_score       n=192,881 mean= 0.001 std= 0.065 min=-1.036 max= 1.764
+Treg_like_score      n=192,881 mean= 0.000 std= 0.079 min=-1.667 max= 8.667
+b_mhc_ii             n=192,881 mean= 0.316 std= 2.239 min=-9.985 max=76.430
+b_costim             n=192,881 mean=-0.060 std= 0.290 min=-6.265 max=14.135
+th2                  n=192,881 mean=-0.067 std= 0.103 min=-5.538 max= 3.050
+th17                 n=192,881 mean=-0.040 std= 0.092 min=-4.127 max= 2.307
+
+--- GSE210395 ---
+Tfh_like_score       n= 32,236 mean=-0.026 std= 0.174 min=-0.747 max= 2.130
+Treg_like_score      n= 32,236 mean=-0.003 std= 0.056 min=-0.205 max= 1.575
+b_mhc_ii             n= 32,236 mean= 3.568 std= 9.514 min=-37.327 max=162.260
+b_costim             n= 32,236 mean=-0.020 std= 0.369 min=-2.975 max= 4.070
+th2                  n= 32,236 mean= 0.035 std= 0.156 min=-0.508 max= 1.643
+th17                 n= 32,236 mean=-0.000 std= 0.044 min=-0.115 max= 1.485
+
+================================================================================
+PART 3: SAMPLE-LEVEL CORRELATION ANALYSIS
+================================================================================
+
+--- GSE195452 (using column: sample_id) ---
+  MISSING SCORES: ['th1']
+
+--- GSE210395 (using column: sample_id) ---
+  MISSING SCORES: ['th1']
+
+================================================================================
+PART 4: GENERATING CORRELATION FIGURES
+================================================================================
+
+================================================================================
+PART 5: SUMMARY AND RECOMMENDATIONS
+================================================================================
+
+### CORRELATION RESULTS ###
+
+### INTERPRETATION ###
+
+○ NULL/WEAK CORRELATIONS
+  Strategy: Focus on ligand amplification + literature interpretation
+  Narrative: 'B cells amplify Th17-driving signals (S100A8/A9)'
+  Discuss: Why no sample correlation (timing, tissue vs blood, etc.)
+
+### NEXT STEPS ###
+1. Review correlation results above
+2. Check generated figures in: results/sample_level_figures
+3. Check per-sample data in: work/sample_level_analysis/
+4. Report results back to Claude for manuscript strategy
+
+================================================================================
+ANALYSIS COMPLETE
+================================================================================
