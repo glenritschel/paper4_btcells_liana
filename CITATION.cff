@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Ritschel
+    given-names: Glen
+    email: [your email]
+    orcid: https://orcid.org/[if you have one]
+title: "B-T Cell Interactions in Systemic Sclerosis - Analysis Code"
+version: 1.0.0
+date-released: 2026-02-13
+url: "https://github.com/glritschel/paper4_btcells_liana"
+repository-code: "https://github.com/glritschel/paper4_btcells_liana"
+license: MIT
+keywords:
+  - systemic sclerosis
+  - B cells
+  - T cells
+  - single-cell RNA sequencing
+  - ligand-receptor analysis
+  - LIANA
+  - Galectin-9
+  - TIM-3
+  - immunoregulation
+references:
+  - type: article
+    authors:
+      - family-names: Ritschel
+        given-names: Glen
+    title: "B Cell Activation Associates with Reduced Pro-Fibrotic T Cell Programs Despite Amplified Inflammatory Ligand Expression in Systemic Sclerosis: Evidence for Immunoregulatory Feedback"
+    journal: "Frontiers in Immunology"
+    year: 2026
+    status: submitted
