@@ -3,11 +3,9 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: Ritschel
     given-names: Glen
-    email: [your email]
-    orcid: https://orcid.org/[if you have one]
 title: "B-T Cell Interactions in Systemic Sclerosis - Analysis Code"
 version: 1.0.0
-date-released: 2026-02-13
+date-released: 2026-02-14
 url: "https://github.com/glritschel/paper4_btcells_liana"
 repository-code: "https://github.com/glritschel/paper4_btcells_liana"
 license: MIT
@@ -30,3 +28,4 @@ references:
     journal: "Frontiers in Immunology"
     year: 2026
     status: submitted
+
