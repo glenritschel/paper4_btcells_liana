@@ -5,6 +5,7 @@ authors:
     given-names: Glen
 title: "B-T Cell Interactions in Systemic Sclerosis - Analysis Code"
 version: 1.0.0
+doi: 10.5281/zenodo.18643526
 date-released: 2026-02-14
 url: "https://github.com/glritschel/paper4_btcells_liana"
 repository-code: "https://github.com/glritschel/paper4_btcells_liana"
