@@ -1,6 +1,6 @@
 # Paper 4: B-T Cell Interactions in Systemic Sclerosis
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18643526.svg)](https://doi.org/10.5281/zenodo.18643526)
 
 ## Overview
 
