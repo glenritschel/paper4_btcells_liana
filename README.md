@@ -1,7 +1,9 @@
 # Paper 4: B-T Cell Interactions in Systemic Sclerosis
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18643526.svg)](https://doi.org/10.5281/zenodo.18643526)
+[![Code DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18643526.svg)](https://doi.org/10.5281/zenodo.18643526)
+[![Manuscript DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18643672.svg)](https://doi.org/10.5281/zenodo.18643672)
 
+# Paper 4: B-T Cell Interactions in Systemic Sclerosis
 ## Overview
 
 This repository contains all code and analysis for:
